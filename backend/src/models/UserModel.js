@@ -1,9 +1,6 @@
-import mongoose, { Document, Schema } from "mongoose";
-import { IUser } from "../types/user.types.js";
+import mongoose from "mongoose";
 
-interface IUserDocument extends Omit<IUser, '_id'>, Document {}
-
-const userSchema = new Schema<IUserDocument>({
+const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: [true, "name is required"],
@@ -25,7 +22,6 @@ const userSchema = new Schema<IUserDocument>({
     timestamps: true, // Automatically manage createdAt and updatedAt fields
 });
 
-const UserModel = mongoose.model<IUserDocument>("UserModel", userSchema);
+const UserModel = mongoose.model("UserModel", userSchema);
 
 export default UserModel;
-export type { IUserDocument };

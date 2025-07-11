@@ -1,10 +1,11 @@
-import { Request, Response } from "express";
 import { User } from "../models/index.js";
-import { IUserRegisterRequest, IUserLoginRequest, IApiResponse, IUserResponse } from "../types";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
-interface TypedRequest<T> extends Request {
-  body: T;
+function generateToken(user) {
+    return jwt.sign({ id: user.id }, process.env.JWT_SECRET || "default secret", {
+        expiresIn: "30d"
+    });
 }
 
 /**
@@ -12,7 +13,7 @@ interface TypedRequest<T> extends Request {
  * @param req - The request object containing user details.
  * @param res - The response object to send back the result.
  */
-async function userRegister(req: TypedRequest<IUserRegisterRequest>, res: Response<IApiResponse<IUserResponse>>): Promise<void> {
+async function userRegister(req, res) {
     try {
         const { name, email, password } = req.body;
 
@@ -55,7 +56,7 @@ async function userRegister(req: TypedRequest<IUserRegisterRequest>, res: Respon
     }
 }
 
-function userLogin(req: TypedRequest<IUserLoginRequest>, res: Response<IApiResponse>): void {
+function userLogin(req, res) {
     // Logic for user login
     res.json({
         success: true,

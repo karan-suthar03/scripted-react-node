@@ -1,4 +1,4 @@
-import express, { Request, Response } from "express";
+import express from "express";
 import cors from "cors";
 
 const app = express();
@@ -12,7 +12,7 @@ app.use(express.static("public"));
 import userRoutes from "./routes/userRoutes.js";
 app.use("/api/users", userRoutes);
 
-app.get("/", (req: Request, res: Response) => {
+app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
