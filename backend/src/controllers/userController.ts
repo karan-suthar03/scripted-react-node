@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { User } from "../models/index.js";
 import { IUserRegisterRequest, IUserLoginRequest, IApiResponse, IUserResponse } from "../types";
-import bycrypt from "bcryptjs";
+import bcrypt from "bcryptjs";
 
 interface TypedRequest<T> extends Request {
   body: T;
@@ -26,7 +26,7 @@ async function userRegister(req: TypedRequest<IUserRegisterRequest>, res: Respon
             return;
         }
 
-        const hashedPassword = await bycrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = new User({
             name,
