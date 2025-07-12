@@ -1,7 +1,7 @@
 import './App.css'
 import NavigationBar from "./components/NavigationBar.jsx";
 import Home from "./pages/Home.jsx";
-import Main from "./pages/Main.jsx";
+import Story from "./pages/Story.jsx";
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Authentication from "./pages/Authentication.jsx";
 
@@ -14,7 +14,7 @@ function App() {
         <div className='min-h-screen bg-[#FEFCF9] flex items-center justify-center'>
             <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/main" element={<Main />} />
+                <Route path="/story" element={<Story />} />
                 <Route path="/login" element={<Authentication />} />
             </Routes>
         </div>

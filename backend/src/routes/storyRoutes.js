@@ -1,8 +1,10 @@
 import express from "express";
-import {begin} from "../controllers/storyController.js";
+import { begin, getStoryData } from "../controllers/storyController.js";
+import { authenticateToken } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.get('/begin', begin)
+router.post('/begin', authenticateToken, begin);
+router.get('/:storyId', authenticateToken, getStoryData);
 
 export default router;
