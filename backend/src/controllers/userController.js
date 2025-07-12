@@ -1,8 +1,6 @@
-import UserModel from "../models/UserModel.js";
+import prisma from "../config/prisma.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-
-const User = UserModel;
 
 function generateToken(user) {
     return jwt.sign(
@@ -22,7 +20,9 @@ async function userRegister(req, res) {
     try {
         const { name, email, password } = req.body;
 
-        const existingUser = await User.findByEmail(email);
+        const existingUser = await prisma.user.findUnique({
+            where: { email }
+        });
 
         if (existingUser) {
             res.status(400).json({
@@ -34,10 +34,12 @@ async function userRegister(req, res) {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const newUser = await User.create({
-            name,
-            email,
-            password: hashedPassword
+        const newUser = await prisma.user.create({
+            data: {
+                name,
+                email,
+                password: hashedPassword
+            }
         });
 
         const token = generateToken(newUser);
@@ -75,7 +77,9 @@ async function userLogin(req, res) {
     try {
         const { email, password } = req.body;
 
-        const user = await User.findByEmail(email);
+        const user = await prisma.user.findUnique({
+            where: { email }
+        });
 
         if (!user) {
             return res.status(401).json({
