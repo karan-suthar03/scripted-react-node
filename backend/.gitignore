@@ -85,3 +85,5 @@ temp/
 *.njsproj
 *.sln
 *.sw?
+
+/src/generated/prisma

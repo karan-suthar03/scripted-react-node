@@ -2,9 +2,15 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import app from './app.js';
-import connectDB from "./config/db.js";
+import prisma from "./config/prisma.js";
 
-await connectDB();
+try {
+  await prisma.$connect();
+  console.log('🚀 Prisma connected to PostgreSQL successfully');
+} catch (error) {
+  console.error('❌ Failed to connect to database:', error);
+  process.exit(1);
+}
 
 const PORT = parseInt(process.env.PORT || "3000", 10);
 
