@@ -22,6 +22,6 @@ const userSchema = new mongoose.Schema({
     timestamps: true, // Automatically manage createdAt and updatedAt fields
 });
 
-const UserModel = mongoose.model("User", userSchema, "scripted");
+const User = mongoose.model("User", userSchema, "users");
 
-export default UserModel;
+export default User;

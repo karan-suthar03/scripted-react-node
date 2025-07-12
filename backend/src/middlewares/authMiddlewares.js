@@ -1,15 +1,14 @@
 import jwt from 'jsonwebtoken';
 
-export const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+const authenticateToken = (req, res, next) => {
+  const token = req.cookies.authToken || (req.headers['authorization'] && req.headers['authorization'].split(' ')[1]);
 
   if (!token) {
     res.status(401).json({ message: 'Access token required' });
     return;
   }
 
-  const jwtSecret = process.env.JWT_SECRET;
+  const jwtSecret = process.env.JWT_SECRET || "default secret";
   if (!jwtSecret) {
     res.status(500).json({ message: 'JWT_SECRET not configured' });
     return;
@@ -24,3 +23,7 @@ export const authenticateToken = (req, res, next) => {
     next();
   });
 };
+
+export {
+  authenticateToken
+}
