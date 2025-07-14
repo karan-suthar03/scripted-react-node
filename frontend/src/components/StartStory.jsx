@@ -5,7 +5,7 @@ export function StartStory({node}) {
     const [pathCardLoading, setPathCardLoading] = useState(false);
     console.log("node:", node);
 
-    function handleOptionClick(option) {
+    function handleCustomInput(option) {
         if (pathCardLoading) return;
         setPathCardLoading(true);
         setTimeout(() => {
@@ -34,7 +34,7 @@ export function StartStory({node}) {
                 />
                 <button
                     disabled={pathCardLoading}
-                    onClick={() => handleOptionClick("Custom input")}
+                    onClick={() => handleCustomInput("Custom input")}
                     className={`mt-4 py-2 px-4 rounded-lg transition-all ${pathCardLoading ? 'bg-gray-300 cursor-not-allowed opacity-50' : 'bg-[#FDD0C5] hover:bg-[#e3bdb3] cursor-pointer'}`}
                 >
                     {pathCardLoading ? 'Loading...' : 'Continue'}
@@ -45,12 +45,12 @@ export function StartStory({node}) {
                     if (node && node.options) {
                         return node.options.map((option, index) => (
                             <PathCard key={index} option={option} pathCardLoading={pathCardLoading}
-                                      setPathCardLoading={setPathCardLoading} onOptionClick={handleOptionClick}/>
+                                      setPathCardLoading={setPathCardLoading}/>
                         ));
                     }
                     return options.map((option, index) => (
                         <PathCard key={index} option={option} pathCardLoading={pathCardLoading}
-                                  setPathCardLoading={setPathCardLoading} onOptionClick={handleOptionClick}/>
+                                  setPathCardLoading={setPathCardLoading}/>
                     ));
                 })()}
             </div>
