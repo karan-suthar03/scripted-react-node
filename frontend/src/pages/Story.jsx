@@ -3,7 +3,7 @@ import Options from "../components/Options.jsx";
 import Node from "../components/Node.jsx";
 import {useEffect, useState} from "react";
 import {getStory} from "../api/story.js";
-import {StartStory} from "../component/StartStory.jsx";
+import {StartStory} from "../components/StartStory.jsx";
 
 
 function Story() {

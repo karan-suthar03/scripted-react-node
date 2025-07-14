@@ -1,5 +1,5 @@
 import {useState} from "react";
-import PathCard from "../components/PathCard.jsx";
+import PathCard from "./PathCard.jsx";
 
 export function StartStory({node}) {
     const [pathCardLoading, setPathCardLoading] = useState(false);
