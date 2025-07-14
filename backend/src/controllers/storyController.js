@@ -1,6 +1,16 @@
 import prisma from "../config/prisma.js";
 import { getStoryPathWithSQL } from "../utils/storyUtils.js";
 
+const startTemplate = {
+    title: "Start your story by writing a starting phrase or a sentence.",
+    options: [
+        "Once upon a time in a land far, far away...",
+        "It was a bright cold day in April, and the clocks were striking thirteen.",
+        "In a hole in the ground there lived a hobbit.",
+        "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness..."
+    ],
+}
+
 async function begin(req, res) {
     const { title } = req.body;
 
@@ -11,10 +21,29 @@ async function begin(req, res) {
     const userId = req.user.id;
 
     try {
+        const startNode = await prisma.node.create({
+            data: {
+                snippet: startTemplate.title,
+                parentNodeId: null,
+                selectedOptionId: null,
+            }
+        });
+
+        const optionData = startTemplate.options.map(option => ({
+            snippet: option,
+            parentNodeId: startNode.id,
+            selectedOptionId: null
+        }));
+
+        await prisma.node.createMany({
+            data: optionData
+        });
+
         const createdStory = await prisma.story.create({
             data: {
                 title: title,
-                authorId: userId
+                authorId: userId,
+                startNodeId: startNode.id,
             }
         });
 

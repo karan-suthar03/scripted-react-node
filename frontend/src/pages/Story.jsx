@@ -3,6 +3,7 @@ import Options from "../components/Options.jsx";
 import Node from "../components/Node.jsx";
 import {useEffect, useState} from "react";
 import {getStory} from "../api/story.js";
+import {StartStory} from "../component/StartStory.jsx";
 
 
 function Story() {
@@ -48,15 +49,22 @@ function Story() {
                         </h1>
                     </div>
                     <div className="w-full">
-                        {story.nodes.map((item, index) => (
-                            <Node key={index}>
-                                <p className="mb-2">{item.content.snippet}</p>
-                                <img src={item.content.image} alt="Story snippet" className="w-1/2 h-auto rounded-lg shadow-md mb-4" />
-                            </Node>
-                        ))}
-                        <Node>
-                            <Options />
-                        </Node>
+                        {
+                            story.nodes && story.nodes.length > 1 ? (
+                                story.nodes.map((node, index) => (
+                                    <Node>
+                                        <Options key={node.id} node={node} />
+                                    </Node>
+                                ))
+                            ) : (
+                                <Node>
+                                    <StartStory node={story.nodes} />
+                                </Node>
+                            )
+                        }
+                        {/*<Node>*/}
+                        {/*    <Options />*/}
+                        {/*</Node>*/}
                     </div>
                 </>
             )}
