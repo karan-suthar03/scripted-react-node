@@ -1,36 +1,20 @@
 import {useNavigate, useSearchParams} from 'react-router-dom';
 import Options from "../components/Options.jsx";
 import Node from "../components/Node.jsx";
-import {useEffect, useState} from "react";
-import {getStory} from "../api/story.js";
+import {useEffect} from "react";
 import {StartStory} from "../components/StartStory.jsx";
+import {StoryProvider, useStory} from "../contexts/StoryContext.jsx";
 
-
-function Story() {
-    const [searchParams] = useSearchParams();
-    const storyId = searchParams.get('id');
+function StoryContent() {
     const navigate = useNavigate();
-    
-    const [story, setStory] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const { story, loading, error } = useStory();
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                const res = await getStory(storyId);
-                console.log("Story data:", res.data);
-                setStory(res.data);
-            } catch (err) {
-                console.error("Error fetching story data:", err);
-                navigate('/');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData().then(() => {});
-    }, [storyId, navigate]);
+        if (error) {
+            console.error("Error fetching story data:", error);
+            navigate('/');
+        }
+    }, [error, navigate]);
 
     return (
         <div className="flex flex-col items-center min-h-screen max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8">
@@ -45,26 +29,50 @@ function Story() {
                 <>
                     <div className="flex w-full bg-[#FEFCF9] mt-16 mb-12">
                         <h1 className="text-6xl font-semibold text-gray-800">
-                            {story.title}
+                            {story?.title}
                         </h1>
                     </div>
                     <div className="w-full">
-                        {
-                            story.nodes && story.nodes.length > 1 ? (
-                                story.nodes.map((node, index) => (
-                                    <Node>
-                                        <Options key={node.id} node={node} />
-                                    </Node>
-                                ))
-                            ) : (
-                                <Node>
-                                    <StartStory node={story.nodes} />
-                                </Node>
+                        {story.nodes.length === 0 ? (
+                            <Node>
+                                <StartStory />
+                            </Node>
                             )
-                        }
-                        {/*<Node>*/}
-                        {/*    <Options />*/}
-                        {/*</Node>*/}
+                            :(
+                            story.nodes.map((node, index) => (
+                                <Node key={index}>
+                                    {index === story.nodes.length - 1 ? (
+                                        <Options node={node} />
+                                    ) : (
+                                        <h1 className="text-4xl font-semibold text-gray-800">
+                                            {node.snippet}
+                                        </h1>
+                                    )}
+                                </Node>
+                            ))
+                            )}
+
+                        {/*{*/}
+                        {/*    story?.nodes && story.nodes.length > 1 ? (*/}
+                        {/*        <>*/}
+                        {/*            {story.nodes.slice(0, -1).map((node, index) => (*/}
+                        {/*                <Node key={index}>*/}
+                        {/*                    <h1 className="text-4xl font-semibold text-gray-800">*/}
+                        {/*                        {node.snippet}*/}
+                        {/*                    </h1>*/}
+                        {/*                </Node>*/}
+                        {/*            ))}*/}
+
+                        {/*            <Node>*/}
+                        {/*                <Options node={story.nodes[story.nodes.length - 1]} />*/}
+                        {/*            </Node>*/}
+                        {/*        </>*/}
+                        {/*    ) : (*/}
+                        {/*        <Node>*/}
+                        {/*            <StartStory node={story?.nodes} />*/}
+                        {/*        </Node>*/}
+                        {/*    )*/}
+                        {/*}*/}
                     </div>
                 </>
             )}
@@ -72,6 +80,16 @@ function Story() {
     );
 }
 
+function Story() {
+    const [searchParams] = useSearchParams();
+    const storyId = searchParams.get('id');
+
+    return (
+        <StoryProvider storyId={storyId}>
+            <StoryContent />
+        </StoryProvider>
+    );
+}
 
 
 export default Story;

@@ -21,29 +21,29 @@ async function begin(req, res) {
     const userId = req.user.id;
 
     try {
-        const startNode = await prisma.node.create({
-            data: {
-                snippet: startTemplate.title,
-                parentNodeId: null,
-                selectedOptionId: null,
-            }
-        });
+        // const startNode = await prisma.node.create({
+        //     data: {
+        //         snippet: startTemplate.title,
+        //         parentNodeId: null,
+        //         selectedOptionId: null,
+        //     }
+        // });
 
-        const optionData = startTemplate.options.map(option => ({
-            snippet: option,
-            parentNodeId: startNode.id,
-            selectedOptionId: null
-        }));
-
-        await prisma.node.createMany({
-            data: optionData
-        });
+        // const optionData = startTemplate.options.map(option => ({
+        //     snippet: option,
+        //     parentNodeId: startNode.id,
+        //     selectedOptionId: null
+        // }));
+        //
+        // await prisma.node.createMany({
+        //     data: optionData
+        // });
 
         const createdStory = await prisma.story.create({
             data: {
                 title: title,
                 authorId: userId,
-                startNodeId: startNode.id,
+                // startNodeId: startNode.id,
             }
         });
 
@@ -96,6 +96,7 @@ async function getStoryData(req, res) {
             return res.status(200).json({
                 success: true,
                 data: {
+                    id:story.id,
                     title: story.title,
                     description: story.description,
                     author: story.author,
@@ -110,6 +111,7 @@ async function getStoryData(req, res) {
         return res.status(200).json({
             success: true,
             data: {
+                id:story.id,
                 title: story.title,
                 description: story.description,
                 author: story.author,
@@ -126,4 +128,94 @@ async function getStoryData(req, res) {
     }
 }
 
-export { begin, getStoryData };
+async function initialSnippet(req, res) {
+    const {data} = req.body;
+
+    const snippet = data.snippet;
+    const storyId = data.storyId;
+
+    try {
+
+
+        const startNode = await prisma.node.create({
+            data:{
+                snippet: snippet,
+                parentNodeId: null,
+                selectedOptionId: null
+            }
+        });
+
+        await prisma.story.update({
+            where: { id: parseInt(storyId) },
+            data: { startNodeId: startNode.id }
+        })
+
+        const optionData = startTemplate.options.map(option => ({
+            snippet: option,
+            parentNodeId: startNode.id,
+            selectedOptionId: null
+        }));
+
+        const options = await prisma.node.createMany({
+            data: optionData
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Initial snippet created successfully",
+            data: {
+                storyId: storyId,
+                snippet: snippet,
+                options: options
+            }
+        });
+    } catch (error) {
+        console.error("Error in initialSnippet:", error);
+        return res.status(500).json({
+            error: "Failed to process initial snippet",
+            details: error.message
+        });
+    }
+}
+
+async function customInitialSnippet(req,res){
+    const {data} = req.body;
+    console.log("Custom Initial Snippet Data:", data);
+    const snippet = data.snippet;
+    const storyId = data.storyId;
+
+    const startNode = await prisma.node.create({
+        data: {
+            snippet: snippet,
+            parentNodeId: null,
+            selectedOptionId: null
+        }
+    });
+
+    const optionData = startTemplate.options.map(option => ({
+        snippet: option,
+        parentNodeId: startNode.id,
+        selectedOptionId: null
+    }));
+
+    await prisma.node.createMany({
+        data: optionData
+    });
+
+    await prisma.story.update({
+        where: { id: parseInt(storyId) },
+        data: { startNodeId: startNode.id }
+    });
+
+    return res.status(200).json({
+        success: true,
+        message: "Custom initial snippet created successfully",
+        data: {
+            storyId: data.storyId,
+            selectedNodeId: startNode.id,
+            snippet: snippet
+        }
+    });
+}
+
+export { begin, getStoryData, initialSnippet, customInitialSnippet };

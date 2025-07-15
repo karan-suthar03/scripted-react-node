@@ -16,7 +16,25 @@ function getStory(storyId) {
         });
 }
 
+function initialSnippet(data){
+    return API.post('/story/initial-snippet', {data})
+        .then(response => response.data.data)
+        .catch(error => {
+            throw error.response ? error.response.data : new Error('Network error');
+        })
+}
+
+function customInitialSnippet(data){
+    return API.post('/story/custom-initial-snippet', {data})
+        .then(response => response.data.data)
+        .catch(error => {
+            throw error.response ? error.response.data : new Error('Network error');
+        });
+}
+
 export {
     beginStory,
-    getStory
+    getStory,
+    initialSnippet,
+    customInitialSnippet
 }
