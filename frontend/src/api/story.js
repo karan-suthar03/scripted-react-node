@@ -32,9 +32,27 @@ function customInitialSnippet(data){
         });
 }
 
+function generateOptions(data){
+    return API.post('/story/generate-options', {data})
+        .then(response => response.data.data)
+        .catch(error => {
+            throw error.response ? error.response.data : new Error('Network error');
+        });
+}
+
+function selectOption(data){
+    return API.post('/story/select-option', {data})
+        .then(response => response.data.data)
+        .catch(error => {
+            throw error.response ? error.response.data : new Error('Network error');
+        })
+}
+
 export {
     beginStory,
     getStory,
     initialSnippet,
-    customInitialSnippet
+    customInitialSnippet,
+    generateOptions,
+    selectOption
 }
