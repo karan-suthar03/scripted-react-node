@@ -150,15 +150,7 @@ async function initialSnippet(req, res) {
             data: { startNodeId: startNode.id }
         })
 
-        const optionData = startTemplate.options.map(option => ({
-            snippet: option,
-            parentNodeId: startNode.id,
-            selectedOptionId: null
-        }));
 
-        const options = await prisma.node.createMany({
-            data: optionData
-        });
 
         return res.status(200).json({
             success: true,
@@ -166,7 +158,7 @@ async function initialSnippet(req, res) {
             data: {
                 storyId: storyId,
                 snippet: snippet,
-                options: options
+                nodeId: startNode.id
             }
         });
     } catch (error) {
