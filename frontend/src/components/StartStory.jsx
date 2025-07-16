@@ -88,7 +88,15 @@ function StartPathCard({option,pathCardLoading,setPathCardLoading}){
                 storyId: story.id
             }
         );
-        console.log('Response:', response);
+        let node = {
+            id: response.nodeId,
+            snippet: response.snippet,
+            options: []
+        }
+        updateStory({
+            ...story,
+            nodes: [node, ...story.nodes]
+        })
         setPathCardLoading(false);
         setLoading(false);
     }

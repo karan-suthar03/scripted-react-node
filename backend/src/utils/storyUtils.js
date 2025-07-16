@@ -82,3 +82,36 @@ export async function getStoryPathWithSQL(startNodeId) {
         return nodeData;
     });
 }
+
+export async function getStoryWithSQL(storyId, nodeId) {
+    // Get the start node id from the Story model
+    const story = await prisma.story.findUnique({
+        where: { id: storyId },
+        select: { startNodeId: true, title: true }
+    });
+    if (!story || !story.startNodeId) return null;
+
+    // Use a recursive CTE to get the path from start node to the target nodeId
+    const result = await prisma.$queryRaw`
+        WITH RECURSIVE story_path AS (
+            SELECT id, snippet, selected_option_id, 1 as path_order
+            FROM nodes
+            WHERE id = ${story.startNodeId}
+            UNION ALL
+            SELECT n.id, n.snippet, n.selected_option_id, sp.path_order + 1
+            FROM nodes n
+            INNER JOIN story_path sp ON n.id = sp.selected_option_id
+            WHERE n.id != sp.id
+        )
+        SELECT id, snippet, path_order
+        FROM story_path
+        WHERE path_order <= (
+            SELECT path_order FROM story_path WHERE id = ${nodeId} LIMIT 1
+        )
+        ORDER BY path_order;
+    `;
+
+    // Concatenate snippets to form the story
+    const storyText = (result || []).map(n => n.snippet).join(' ');
+    return { title: story.title, story: storyText };
+}

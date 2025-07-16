@@ -1,5 +1,6 @@
 import prisma from "../config/prisma.js";
-import { getStoryPathWithSQL } from "../utils/storyUtils.js";
+import { getStoryPathWithSQL, getStoryWithSQL} from "../utils/storyUtils.js";
+import {generatePaths} from "../config/geminiClient.js";
 
 const startTemplate = {
     title: "Start your story by writing a starting phrase or a sentence.",
@@ -184,15 +185,6 @@ async function customInitialSnippet(req,res){
         }
     });
 
-    const optionData = startTemplate.options.map(option => ({
-        snippet: option,
-        parentNodeId: startNode.id,
-        selectedOptionId: null
-    }));
-
-    await prisma.node.createMany({
-        data: optionData
-    });
 
     await prisma.story.update({
         where: { id: parseInt(storyId) },
@@ -209,14 +201,6 @@ async function customInitialSnippet(req,res){
         }
     });
 }
-
-const generatedOptionsTemplate = [
-    "generated option 1",
-    "generated option 2",
-    "generated option 3",
-    "generated option 4"
-]
-
 async function generateOptions(req, res) {
     const {data} = req.body;
     const storyId = data.storyId;
@@ -244,13 +228,20 @@ async function generateOptions(req, res) {
         });
     }
 
-    const options = generatedOptionsTemplate.map(option => ({
-        snippet: option,
-        parentNodeId: nodeId,
-        selectedOptionId: null
-    }));
+
 
     try {
+        let story = await getStoryWithSQL(storyId,nodeId);
+
+        let options = await generatePaths(story.story,story.title,10);
+
+        console.log("Generated Options:", options);
+
+        options = options.map(option => ({
+            snippet: option.path,
+            parentNodeId: nodeId,
+            selectedOptionId: null
+        }));
         let generated = await prisma.node.createManyAndReturn({
             data: options
         })
