@@ -210,4 +210,98 @@ async function customInitialSnippet(req,res){
     });
 }
 
-export { begin, getStoryData, initialSnippet, customInitialSnippet };
+const generatedOptionsTemplate = [
+    "generated option 1",
+    "generated option 2",
+    "generated option 3",
+    "generated option 4"
+]
+
+async function generateOptions(req, res) {
+    const {data} = req.body;
+    const storyId = data.storyId;
+    const nodeId = data.nodeId;
+
+    let existingNodeOptions = await prisma.node.findMany({
+        where: {
+            parentNodeId: parseInt(nodeId)
+        }
+    });
+
+    if (existingNodeOptions.length > 0) {
+        existingNodeOptions = existingNodeOptions.map(option => ({
+            id: option.id,
+            snippet: option.snippet
+        }));
+        return res.status(200).json({
+            success: true,
+            message: "Options already exist for this node",
+            data: {
+                storyId: storyId,
+                nodeId: nodeId,
+                options: existingNodeOptions
+            }
+        });
+    }
+
+    const options = generatedOptionsTemplate.map(option => ({
+        snippet: option,
+        parentNodeId: nodeId,
+        selectedOptionId: null
+    }));
+
+    try {
+        let generated = await prisma.node.createManyAndReturn({
+            data: options
+        })
+
+        generated = generated.map(node => ({
+            id: node.id,
+            snippet: node.snippet
+        }));
+
+        return res.status(200).json({
+            success: true,
+            message: "Options generated successfully",
+            data: {
+                storyId: storyId,
+                nodeId: nodeId,
+                options: generated
+            }
+        });
+    } catch (error) {
+        console.error("Error generating options:", error);
+        return res.status(500).json({
+            error: "Failed to generate options",
+            details: error.message
+        });
+    }
+}
+
+async function selectOption(req, res) {
+    const {data} = req.body;
+
+    const parentNodeId = data.parentNodeId;
+    const selectedNode = data.node;
+    const storyId = data.storyId;
+
+    await prisma.node.update({
+        where:{
+            id:parentNodeId
+        },
+        data:{
+            selectedOptionId: selectedNode.id
+        }
+    });
+    return res.status(200).json({
+        success: true,
+        message: "Option selected successfully",
+        data: {
+            storyId: storyId,
+            nodeId: parentNodeId,
+            selectedNode: selectedNode
+        }
+    });
+}
+
+export { begin, getStoryData, initialSnippet, customInitialSnippet, generateOptions, selectOption };

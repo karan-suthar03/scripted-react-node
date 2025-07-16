@@ -24,7 +24,7 @@ export async function getStoryPathWithSQL(startNodeId) {
             FROM nodes n
             INNER JOIN story_path sp ON n.id = sp.selected_option_id
         ),
-        -- Get options for all nodes in the path
+        -- Get options ONLY for nodes that don't have a selected_option_id
         node_options AS (
             SELECT 
                 sp.id as node_id,
@@ -39,6 +39,7 @@ export async function getStoryPathWithSQL(startNodeId) {
                 ) as options
             FROM story_path sp
             LEFT JOIN nodes opt ON opt.parent_node_id = sp.id
+            WHERE sp.selected_option_id IS NULL  -- Only fetch options for nodes without selections
             GROUP BY sp.id
         )
         SELECT 
@@ -66,19 +67,16 @@ export async function getStoryPathWithSQL(startNodeId) {
             snippet: node.snippet
         };
 
-        // Add options for all nodes
-        if (node.options && Array.isArray(node.options)) {
-            nodeData.options = node.options.map(opt => ({
-                id: Number(opt.id),
-                snippet: opt.snippet
-            }));
-        } else {
-            nodeData.options = [];
-        }
-
-        // Mark story end if this is the last node with no options
-        if (node.selected_option_id === null && nodeData.options.length === 0) {
-            nodeData.isStoryEnd = true;
+        // Only add options if no selection has been made (selected_option_id is null)
+        if (node.selected_option_id === null) {
+            if (node.options && Array.isArray(node.options)) {
+                nodeData.options = node.options.map(opt => ({
+                    id: Number(opt.id),
+                    snippet: opt.snippet
+                }));
+            } else {
+                nodeData.options = [];
+            }
         }
 
         return nodeData;
